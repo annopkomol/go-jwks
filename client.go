@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/square/go-jose"
 	"golang.org/x/sync/semaphore"
-	"log"
 	"time"
 )
 
@@ -37,14 +36,20 @@ func NewDefaultClient(source JWKSSource, refresh time.Duration, ttl time.Duratio
 	return NewClient(source, DefaultCache(ttl), refresh)
 }
 
-func NewClient(source JWKSSource, cache Cache, refresh time.Duration) JWKSClient {
-	return &jWKSClient{
+func NewClient(source JWKSSource, cache Cache, refresh time.Duration, options ...Option) JWKSClient {
+	var client JWKSClient = &jWKSClient{
 		source:  source,
 		cache:   cache,
 		refresh: refresh,
 		sem:     semaphore.NewWeighted(1),
 	}
+	for _, option := range options {
+		client = option(client)
+	}
+	return client
 }
+
+type Option func(client JWKSClient) JWKSClient
 
 func (c *jWKSClient) GetSignatureKey(keyId string) (*jose.JSONWebKey, error) {
 	return c.GetKey(keyId, "sig")

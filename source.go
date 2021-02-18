@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/square/go-jose"
-	"log"
 	"net/http"
 )
 
